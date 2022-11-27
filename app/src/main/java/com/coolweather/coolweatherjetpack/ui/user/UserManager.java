@@ -1,48 +1,56 @@
 package com.coolweather.coolweatherjetpack.ui.user;
 
-import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Build;
-import android.util.ArraySet;
-
-import androidx.annotation.RequiresApi;
+import android.widget.Toast;
 
 import com.coolweather.coolweatherjetpack.CoolWeatherApplication;
 
-import java.util.Random;
-
-@RequiresApi(api = Build.VERSION_CODES.M)
-
 public class UserManager {
-    private ArraySet<Integer> userIds = new ArraySet<>();
-    Random random = new Random();
     private static UserManager sInstance;
-    public static final String USER_ID = "user_id";
-    SharedPreferences sharedPreferences;
 
-    private boolean isLogin = false;
-    private boolean hasPermission = false;
-    private boolean isSuperUser = false;
+    public static final int LOGOUT = 0;
+    public static final int LOGIN = 1;
+    public static final int LOGIN_SUPER = 2;
 
     private UserManager() {
-        sharedPreferences = CoolWeatherApplication.context.getSharedPreferences("users", Context.MODE_PRIVATE);
     }
 
-    public void registerUserIds(int id) {
-        int i = random.nextInt();
-        userIds.add(random.nextInt());
-        sharedPreferences.edit().putInt(USER_ID, i).apply();
-    }
-
-    public UserManager getInstance() {
+    public static UserManager getInstance() {
         if (sInstance == null) {
             sInstance = new UserManager();
         }
         return sInstance;
     }
 
-    public void getUserById(int id) {
+    public void login(User user, boolean superUser) {
+        user.setState(LOGIN);
+        if (superUser) {
+            grantSuperUserPermission(user);
+        }
+    }
 
+    public void logout(User user) {
+        user.setState(LOGOUT);
+    }
+
+    private void grantSuperUserPermission(User user) {
+        user.setState(LOGIN_SUPER);
+    }
+
+    public void accessData(User user) {
+        if (user.getState() == LOGIN) {
+            Toast.makeText(CoolWeatherApplication.context, "access data success", Toast.LENGTH_SHORT).show();
+        } else if (user.getState() == LOGOUT) {
+            Toast.makeText(CoolWeatherApplication.context, "user not login", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void changeData(User user) {
+        if (user.getState() == LOGIN) {
+            Toast.makeText(CoolWeatherApplication.context, "no permission to change data", Toast.LENGTH_SHORT).show();
+        } else if (user.getState() == LOGOUT) {
+            Toast.makeText(CoolWeatherApplication.context, "user not login", Toast.LENGTH_SHORT).show();
+        } else if (user.getState() == LOGIN_SUPER) {
+            Toast.makeText(CoolWeatherApplication.context, "change data success", Toast.LENGTH_SHORT).show();
+        }
     }
 }
